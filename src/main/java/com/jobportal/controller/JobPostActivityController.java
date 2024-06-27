@@ -1,12 +1,15 @@
 package com.jobportal.controller;
 
 import com.jobportal.entities.JobPostActivity;
+import com.jobportal.entities.RecruiterJobsDto;
+import com.jobportal.entities.RecruiterProfile;
 import com.jobportal.entities.Users;
 import com.jobportal.services.JobPostActivityService;
 import com.jobportal.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class JobPostActivityController {
@@ -34,9 +38,15 @@ public class JobPostActivityController {
 		Authentication authentication = SecurityContextHolder.getContext()
 				.getAuthentication();
 
-		if(!(authentication instanceof AnonymousAuthenticationToken)) {
+		if (!(authentication instanceof AnonymousAuthenticationToken)) {
 			String currentUsername = authentication.getName();
 			model.addAttribute("username", currentUsername);
+			if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("Recruiter"))) {
+				List<RecruiterJobsDto> recruiterJobs =
+						jobPostActivityService
+								.getRecruiterJobs(((RecruiterProfile)currentUserProfile).getUserAccountId());
+				model.addAttribute("jobPost", recruiterJobs);
+			}
 		}
 		model.addAttribute("user", currentUserProfile);
 		return "dashboard";
@@ -61,4 +71,5 @@ public class JobPostActivityController {
 		JobPostActivity saved = jobPostActivityService.addNew(jobPostActivity); // Adds it to database
 		return "redirect:/dashboard/";
 	}
+
 }
