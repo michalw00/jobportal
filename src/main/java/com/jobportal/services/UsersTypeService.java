@@ -1,7 +1,7 @@
 package com.jobportal.services;
 
 import com.jobportal.entities.UsersType;
-import com.jobportal.repository.UsersTypeRepository;
+import com.jobportal.repository.UsersTypeRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,14 +10,14 @@ import java.util.List;
 @Service
 public class UsersTypeService {
 
-	private final UsersTypeRepository usersTypeRepository;
+	private final UsersTypeRepo usersTypeRepo;
 
 	@Autowired
-	public UsersTypeService(UsersTypeRepository usersTypeRepository) {
-		this.usersTypeRepository = usersTypeRepository;
+	public UsersTypeService(UsersTypeRepo usersTypeRepo) {
+		this.usersTypeRepo = usersTypeRepo;
 	}
 
 	public List<UsersType> getAll() {
-		return usersTypeRepository.findAll();
+		return usersTypeRepo.findAll();
 	}
 }
