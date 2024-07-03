@@ -5,7 +5,13 @@ import com.jobportal.entities.Skills;
 import com.jobportal.entities.Users;
 import com.jobportal.repository.UsersRepo;
 import com.jobportal.services.JobSeekerProfileService;
+import com.jobportal.util.FileDownloadUtil;
 import com.jobportal.util.FileUploadUtil;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -114,6 +120,38 @@ public class JobSeekerProfileController {
 			throw new RuntimeException(ex);
 		}
 		return "redirect:/dashboard/";
+	}
+
+	@GetMapping("/{id}")
+	public String candidateProfile(@RequestParam("id") int id, Model model) {
+		Optional<JobSeekerProfile> seekerProfile = jobSeekerProfileService.getOne(id);
+		model.addAttribute("profile", seekerProfile.get());
+		return "job-seeker-profile";
+	}
+
+	@GetMapping("/downloadResume")
+	public ResponseEntity<?> downloadResume(@RequestParam(value = "fileName") String fileName,
+	@RequestParam(value = "userID") String userId) {
+		FileDownloadUtil fileDownloadUtil = new FileDownloadUtil();
+		Resource resource = null;
+
+		try {
+			resource = fileDownloadUtil
+					.getFileAsResource("photos/candidate/"+userId, fileName);
+		} catch (IOException io) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		if (resource == null) {
+			return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+		}
+
+		String contentType = "application/octet-stream";
+		String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+				.header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+				.body(resource);
 	}
 
 }
