@@ -24,4 +24,7 @@ public class JobSeekerSaveService {
 		return jobSeekerSaveRepo.findByJob(job);
 	}
 
+	public void addNew(JobSeekerSave jobSeekerSave) {
+		jobSeekerSaveRepo.save(jobSeekerSave);
+	}
 }
